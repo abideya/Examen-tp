@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Docker Multi-container Lab</title>
+  <style>
+    body{font-family:system-ui,sans-serif;background:#f3f6fb;color:#172033;margin:0;padding:2rem}
+    main{max-width:760px;margin:auto} h1{text-align:center}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
+    section{background:white;padding:1.3rem;border-radius:14px;box-shadow:0 4px 16px #15223b12}
+    label{display:block;margin:.7rem 0 .25rem} input{box-sizing:border-box;width:100%;padding:.7rem;border:1px solid #cbd5e1;border-radius:7px}
+    button{margin-top:1rem;padding:.7rem 1rem;border:0;border-radius:7px;background:#155eef;color:white;cursor:pointer}
+    #message{padding:1rem;margin-top:1rem;background:#e5edf9;border-radius:8px;white-space:pre-wrap}
+  </style>
+</head>
+<body>
+<main>
+  <h1>Docker · Application multi-conteneurs</h1>
+  <p>Frontend Nginx, deux backends Python et une base MySQL.</p>
+  <div class="cards">
+    <section>
+      <h2>Créer un compte</h2>
+      <form id="signup-form">
+        <label for="su-username">Nom d'utilisateur</label>
+        <input id="su-username" name="username" required minlength="3">
+        <label for="su-password">Mot de passe</label>
+        <input id="su-password" name="password" type="password" required minlength="8">
+        <button type="submit">Sign Up</button>
+      </form>
+    </section>
+    <section>
+      <h2>Se connecter</h2>
+      <form id="login-form">
+        <label for="li-username">Nom d'utilisateur</label>
+        <input id="li-username" name="username" required>
+        <label for="li-password">Mot de passe</label>
+        <input id="li-password" name="password" type="password" required>
+        <button type="submit">Login</button>
+      </form>
+    </section>
+  </div>
+  <div id="message" role="status">Prêt. Créez un compte ou connectez-vous.</div>
+</main>
+<script>
+const message = document.getElementById('message');
+async function submitForm(event, endpoint) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const data = Object.fromEntries(new FormData(form).entries());
+  message.textContent = 'Requête en cours…';
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    const result = await response.json();
+    message.textContent = result.message || (response.ok ? 'Succès' : 'Erreur');
+    if (response.ok) form.reset();
+  } catch (error) {
+    message.textContent = 'Impossible de joindre le service. Vérifiez les conteneurs et les logs.';
+  }
+}
+document.getElementById('signup-form').addEventListener('submit', e => submitForm(e, '/api/signup/'));
+document.getElementById('login-form').addEventListener('submit', e => submitForm(e, '/api/login/'));
+</script>
+</body>
+</html>
